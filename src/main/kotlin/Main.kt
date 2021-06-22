@@ -29,16 +29,16 @@ suspend fun main() {
         uploadFile()
         createFunction()
     }
-        listUsers()
-        deleteUser()
-        listCollection()
-        addDoc()
-        listDoc()
-        deleteCollection()
-        deleteFile()
+    listUsers()
+    deleteUser()
+    listCollection()
+    addDoc()
+    listDoc()
+    deleteCollection()
+    deleteFile()
 
-        listFunctions()
-        deleteFunction()
+    listFunctions()
+    deleteFunction()
 }
 
 suspend fun createCollection() {
