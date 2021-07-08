@@ -1,4 +1,4 @@
-# Playground for Dart
+# Playground for Kotlin
 
 Simple examples that help you get started with Appwrite + Kotlin (=❤️)
 
