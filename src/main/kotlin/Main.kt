@@ -14,8 +14,8 @@ import kotlin.math.min
 
 val client = Client()
     .setEndpoint("https://demo.appwrite.io/v1")
-    .setProject("608fa1dd20ef0")
-    .setKey("YOUR_KEY")
+    .setProject("playgrounds")
+    .setKey("98d6dc820108f1bbcbf3a29c4d8de81a7a044356455938743ee71b97af7e528212899d247d8cd759ebd7219e836a768acf78dd8de40954b6e6829e9ec90fc6eb4ea024f13662530c48b93679512abf5224396ceed6ac4b32408fed3b36db668c81ceb3bf09e07ebd8d0d182754d879453436bb5ced561c9a9d9ebd9c5aa83af9")
     // .setJWT("jwt") // Enable this to authenticate with JWT created using client SDK
 
 lateinit var collectionId: String
@@ -46,7 +46,7 @@ suspend fun createCollection() {
     val database = Database(client)
     println("Running create collection API")
     try {
-        val res = database.createCollection(collectionId = "movies", name = "Movies", permission = "documents", read = arrayListOf("role:all"), write = arrayListOf(
+        val res = database.createCollection(collectionId = "movies", name = "Movies", permission = "document", read = arrayListOf("role:all"), write = arrayListOf(
             "role:all"))
         collectionId = res.id
         var res2 = database.createStringAttribute(
