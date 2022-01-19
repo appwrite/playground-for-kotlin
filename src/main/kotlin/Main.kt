@@ -14,7 +14,7 @@ import kotlin.math.min
 
 val client = Client()
     .setEndpoint("https://localhost/v1")
-    .setProject("playgrounds")
+    .setProject("YOUR PROJECT ID")
     .setKey("YOUR API KEY")
     // .setJWT("jwt") // Enable this to authenticate with JWT created using client SDK
 
