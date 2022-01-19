@@ -9,12 +9,13 @@ import io.appwrite.services.Storage
 import io.appwrite.services.Users
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import kotlin.math.min
 
 
 val client = Client()
-    .setEndpoint("https://demo.appwrite.io/v1")
-    .setProject("608fa1dd20ef0")
-    .setKey("YOUR_KEY")
+    .setEndpoint("https://localhost/v1")
+    .setProject("YOUR PROJECT ID")
+    .setKey("YOUR API KEY")
     // .setJWT("jwt") // Enable this to authenticate with JWT created using client SDK
 
 lateinit var collectionId: String
@@ -45,30 +46,26 @@ suspend fun createCollection() {
     val database = Database(client)
     println("Running create collection API")
     try {
-        val res = database.createCollection(name = "Movies", read = arrayListOf("*"), write = arrayListOf(
-            "*")
-        , rules =
-        arrayListOf(    mapOf(
-                "label" to "Name",
-                "key" to "name",
-                "type" to "text",
-                "default" to "Empty Name",
-                "required" to true,
-                "array" to false
-            ),
-            mapOf(
-                "label" to "release_year",
-                "key" to "release_year",
-                "type" to "numeric",
-                "default" to 1970,
-                "required" to true,
-                "array" to false
-            )
-        ))
-        var jsonString = res.body?.string() ?: ""
-        val je: JsonElement = JsonParser.parseString(jsonString)
-        collectionId = je.asJsonObject.get("\$id").asString
-        println(jsonString)
+        val res = database.createCollection(collectionId = "movies", name = "Movies", permission = "document", read = arrayListOf("role:all"), write = arrayListOf(
+            "role:all"))
+        collectionId = res.id
+        var res2 = database.createStringAttribute(
+            collectionId = collectionId,
+            key = "name",
+            size = 255,
+            required = true,
+            default = "",
+            array = false
+        )
+        var res3 = database.createIntegerAttribute(
+            collectionId = collectionId,
+            key = "release_year",
+            required = true,
+            min = 0,
+            max = 9999,
+            array = false
+        )
+        println(res.toMap())
     } catch (e:AppwriteException) {
         println(e.message);
     }
@@ -79,10 +76,7 @@ suspend fun listCollection() {
     println("Running list collection API")
     try {
         val res = database.listCollections()
-        var jsonString = res.body?.string() ?: ""
-        val je: JsonElement = JsonParser.parseString(jsonString)
-        val collection = je.asJsonObject.get("collections").asJsonArray[0]
-        println(collection)
+        println(res.collections.first().toMap())
     } catch (e:AppwriteException) {
         println(e.message)
     }
@@ -105,10 +99,11 @@ suspend fun addDoc() {
     try {
         val res = database.createDocument(
             collectionId = collectionId,
+            documentId = "unique()",
             data = mapOf("name" to "Spider Man", "release_year" to 1920),
-            read = arrayListOf("*"),
-            write = arrayListOf("*"))
-        println(res.body?.string() ?: "")
+            read = arrayListOf("role:all"),
+            write = arrayListOf("role:all"))
+        println(res.toMap())
     } catch (e:AppwriteException) {
         println(e.message)
     }
@@ -119,7 +114,7 @@ suspend fun listDoc() {
     println("Running List Document API")
     try {
         val response = database.listDocuments(collectionId = collectionId);
-        println(response.body?.string() ?: "")
+        println(response.documents.first().toMap())
     } catch (e:AppwriteException) {
         println(e.message)
     }
@@ -132,14 +127,13 @@ suspend fun uploadFile() {
         File("./nature.jpg")
     try {
         val response = storage.createFile(
+            fileId = "unique()",
             file = file, //multipart file
             read = arrayListOf("*"),
             write = arrayListOf(),
         )
-        val jsonString = response.body?.string() ?: ""
-        val je: JsonElement = JsonParser.parseString(jsonString)
-        fileId = je.asJsonObject.get("\$id").asString
-        println(jsonString)
+        fileId = response.id
+        println(response.toMap())
     } catch (e:AppwriteException) {
         println(e.message)
     }
@@ -161,11 +155,10 @@ suspend fun createFunction() {
     println("Running Create Function API")
     try {
         val res = functions.create(
-            name = "test function", execute = arrayListOf(), env = "dart-2.12")
-        var jsonString = res.body?.string() ?: ""
-        val je: JsonElement = JsonParser.parseString(jsonString)
-        functionId = je.asJsonObject.get("\$id").asString
-        println(jsonString)
+            functionId = "unique()",
+            name = "test function", execute = arrayListOf(), runtime = "dart-2.12")
+        functionId = res.id
+        println(res.toMap())
     } catch (e:AppwriteException) {
         println(e.message)
     }
@@ -176,7 +169,7 @@ suspend fun listFunctions() {
     println("Running List Functions API")
     try {
         val res = functions.list()
-        println(res.body?.string() ?: "")
+        println(res.functions.first().toMap())
     } catch (e:AppwriteException) {
         println(e.message)
     }
@@ -197,12 +190,8 @@ suspend fun listUsers() {
     println("Running list users API")
     val users = Users(client)
     try {
-        val response = users.list(
-        )
-        var jsonString = response.body?.string() ?: ""
-        val gson = GsonBuilder().setPrettyPrinting().create()
-        val je: JsonElement = JsonParser.parseString(jsonString)
-        println(gson.toJson(je))
+        val response = users.list()
+        println(response.users.first().toMap())
     } catch (e: AppwriteException) {
         println(e)
     }
@@ -213,14 +202,12 @@ suspend fun createUser(email: String, password: String, name: String) {
     val users = Users(client)
     try {
         val response = users.create(
+            userId = "unique()",
             email = "email@example.com",
             password = "password",
         )
-        var jsonString = response.body?.string() ?: ""
-        val gson = GsonBuilder().setPrettyPrinting().create()
-        val je: JsonElement = JsonParser.parseString(jsonString)
-        userId = je.asJsonObject.get("\$id").asString
-        println(gson.toJson(je))
+        userId = response.id
+        println(response.toMap())
     } catch (e: AppwriteException) {
         println(e)
     }
@@ -232,10 +219,7 @@ suspend fun deleteUser() {
     try {
         val response = users.delete(
             userId = userId        )
-        var jsonString = response.body?.string() ?: ""
-        val gson = GsonBuilder().setPrettyPrinting().create()
-        val je: JsonElement = JsonParser.parseString(jsonString)
-        println(gson.toJson(je))
+        println("user deleted")
     } catch (e: AppwriteException) {
         println(e)
     }
