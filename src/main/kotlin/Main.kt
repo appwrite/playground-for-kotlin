@@ -7,7 +7,9 @@ import io.appwrite.services.Users
 import java.io.File
 
 val client = Client()
-    .setEndpoint("https://demo.appwrite.io/v1")
+    .setEndpoint("http://localhost/v1")
+    .setProject("YOUR PROJECT ID")
+    .setKey("YOUR API KEY")
     // .setJWT("jwt") // Enable this to authenticate with JWT created using client SDK
 
 val database = Database(client)
