@@ -2,14 +2,14 @@
 
 Simple examples that help you get started with Appwrite + Kotlin (=❤️)
 
-This is Appwrite server side integration with Kotline. For Android integration please look at our [Android playground](https://github.com/appwrite/playground-for-android) and [Android SDK](https://github.com/appwrite/sdk-for-android)
+This is Appwrite server side integration with Kotlin. For Android integration please look at our [Android playground](https://github.com/appwrite/playground-for-android) and [Android SDK](https://github.com/appwrite/sdk-for-android)
 
 ### Work in progress
 
-Appwrite playground is a simple way to explore the Appwrite API and Appwrite Dart SDK. Use the source code of this page to learn how to use different Appwrite Dart SDK features.
+Appwrite playground is a simple way to explore the Appwrite API and Appwrite Kotlin SDK. Use the source code of this page to learn how to use different Appwrite Kotlin SDK features.
 
 ## Get Started
-This playground doesn't include any dart best practices, but rather intended to show some of the most simple examples and use cases of using the Appwrite API in your dart application.
+This playground doesn't include any Kotlin best practices, but rather intended to show some of the most simple examples and use cases of using the Appwrite API in your Kotlin application.
 
 ## System Requirements
 * A Linux/Windows/Mac system Intellij Idea
