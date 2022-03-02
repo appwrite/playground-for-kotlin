@@ -2,7 +2,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.10'
 }
 
-group = 'me.dlohani'
+group = 'io.appwrite'
 version = '1.0-SNAPSHOT'
 
 repositories {
@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    implementation("io.appwrite:sdk-for-kotlin:0.2.5")
-    implementation 'com.google.code.gson:gson:2.8.7'
+    implementation("io.appwrite:sdk-for-kotlin:0.3.0b-SNAPSHOT")
+    implementation 'com.google.code.gson:gson:2.9.0'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
 }
 
