@@ -201,7 +201,8 @@ suspend fun createFunction() {
         functionId = "unique()",
         name = "Test Function",
         execute = listOf("role:all"),
-        runtime = "dart-2.14"
+        runtime = "dart-2.14",
+        vars = mapOf("ENV" to "value")
     )
     functionId = res.id
     println(res.toMap())
@@ -229,8 +230,7 @@ suspend fun uploadFile() {
         bucketId = bucketId,
         fileId = "unique()",
         file = file, // Multipart file
-        read = listOf("role:all"),
-        write = listOf(),
+        read = listOf("role:all")
     )
     fileId = response.id
     println(response.toMap())
