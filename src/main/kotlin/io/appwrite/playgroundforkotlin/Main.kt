@@ -1,5 +1,8 @@
+package io.appwrite.playgroundforkotlin
+
 import io.appwrite.Client
 import io.appwrite.exceptions.AppwriteException
+import io.appwrite.extensions.toJson
 import io.appwrite.services.Database
 import io.appwrite.services.Functions
 import io.appwrite.services.Storage
@@ -9,10 +12,10 @@ import java.io.File
 import kotlin.system.exitProcess
 
 val client = Client()
-    .setEndpoint("http://localhost/v1")
-    .setProject("YOUR PROJECT ID")
-    .setKey("YOUR API KEY")
-    // .setJWT("jwt") // Enable this to authenticate with JWT created using client SDK
+    .setEndpoint("http://192.168.4.23/v1")
+    .setProject("test")
+    .setKey("2d1670e9a828bd47d9b27356d56fadf7ceea4c815abbabe644eb3195b88f3b3b495a5f530785b70ef705d9f164f751cc2cf10546ed31b71c62eb151fd2bb96053917731dad2a84f439cb0628dcde59f1311c3ba2be0433d0b73ecb700cadaa07b215d810ecc9fb3c092e178b0dd4fa7bda5819ebbd1ab4917f949e3e936518e1")
+    .setSelfSigned(true)
 
 val database = Database(client)
 val storage = Storage(client)
@@ -25,6 +28,7 @@ lateinit var fileId: String
 lateinit var bucketId: String
 lateinit var userId: String
 lateinit var functionId: String
+
 
 suspend fun main() {
     createUser("${Math.random()}@appwrite.io", "user@123", "Kotlin Player")
@@ -43,6 +47,7 @@ suspend fun main() {
     deleteFunction()
 
     createBucket()
+    listBuckets()
     uploadFile()
     listFiles()
     deleteFile()
@@ -53,27 +58,24 @@ suspend fun main() {
 
 suspend fun createUser(email: String, password: String, name: String) {
     println("Running create user API")
-
-    val response = users.create(
+    val user = users.create(
         userId = "unique()",
         email,
         password,
         name
     )
-    userId = response.id
-    println(response.toMap())
+    userId = user.id
+    println(user.toJson())
 }
 
 suspend fun listUsers() {
     println("Running list users API")
-
-    val response = users.list()
-    println(response.users.first().toMap())
+    val users = users.list()
+    println(users.toJson())
 }
 
 suspend fun deleteUser() {
     println("Running delete user API")
-
     users.delete(userId)
     println("User deleted")
 }
@@ -81,18 +83,18 @@ suspend fun deleteUser() {
 suspend fun createCollection() {
     println("Running create collection API")
 
-    val res = database.createCollection(
+    val collection = database.createCollection(
         collectionId = "movies",
         name = "Movies",
         permission = "document",
         read = arrayListOf("role:all"),
         write = arrayListOf("role:all")
     )
+    collectionId = collection.id
+    println(collection.toJson())
 
-    collectionId = res.id
-    println(res.toMap())
-    println("\tRunning create string attribute")
-    var res2 = database.createStringAttribute(
+    println("Running create string attribute")
+    val str = database.createStringAttribute(
         collectionId = collectionId,
         key = "name",
         size = 255,
@@ -100,71 +102,73 @@ suspend fun createCollection() {
         default = "",
         array = false
     )
+    println(str.toJson())
 
-    println("\tRunning create integer attribute")
-    var res3 = database.createIntegerAttribute(
+    println("Running create integer attribute")
+    val int = database.createIntegerAttribute(
         collectionId = collectionId,
         key = "release_year",
         required = true,
         min = 0,
         max = 9999
     )
+    println(int.toJson())
 
-    println("\tRunning create float attribute")
-    var res4 = database.createFloatAttribute(
+    println("Running create float attribute")
+    val float = database.createFloatAttribute(
         collectionId = collectionId,
         key = "rating",
         required = true,
         min = 0.0,
         max = 99.99
     )
+    println(float.toJson())
 
-    println("\tRunning create boolean attribute")
-    var res5 = database.createBooleanAttribute(
+    println("Running create boolean attribute")
+    val bool = database.createBooleanAttribute(
         collectionId = collectionId,
         key = "kids",
         required = true
     )
+    println(bool.toJson())
 
-    println("\tRunning create email attribute")
-    var res6 = database.createEmailAttribute(
+    println("Running create email attribute")
+    val email = database.createEmailAttribute(
         collectionId = collectionId,
         key = "email",
         required = false,
         default = ""
     )
+    println(email.toJson())
 
     delay(3000)
 
-    println("\tRunning create index")
-    var res7 = database.createIndex(
+    println("Running create index")
+    val index = database.createIndex(
         collectionId = collectionId,
         key = "name_email_idx",
         type = "fulltext",
         attributes = listOf("name", "email")
     )
-
-    println(res.toMap())
+    println(index.toJson())
 }
 
 suspend fun listCollections() {
     println("Running list collection API")
-
-    val res = database.listCollections()
-    println(res.collections.first().toMap())
+    val collections = database.listCollections()
+    println(collections.toJson())
 }
 
 suspend fun deleteCollection() {
     println("Running delete collection API")
-
     database.deleteCollection(collectionId)
-    println("collection deleted")
+    println("Collection Deleted")
 }
 
 suspend fun createDocument() {
     println("Running Add Document API")
 
-    val res = database.createDocument(
+    val document = database.createDocument(
         collectionId = collectionId,
         documentId = "unique()",
         data = mapOf(
@@ -176,84 +180,86 @@ suspend fun createDocument() {
         read = listOf("role:all"),
         write = listOf("role:all")
     )
-    documentId = res.id
-    println(res.toMap())
+    documentId = document.id
+    println(document.toJson())
 }
 
 suspend fun listDocuments() {
     println("Running List Document API")
-
-    val response = database.listDocuments(collectionId)
-    println(response.documents.firstOrNull()?.toMap())
+    val documents = database.listDocuments(collectionId)
+    println(documents.toJson())
 }
 
 suspend fun deleteDocument() {
     println("Running Delete Document API")
-
     database.deleteDocument(collectionId, documentId)
-    println("Document deleted")
+    println("Document Deleted")
 }
 
 suspend fun createFunction() {
     println("Running Create Function API")
-
-    val res = functions.create(
+    val function = functions.create(
         functionId = "unique()",
         name = "Test Function",
         execute = listOf("role:all"),
         runtime = "dart-2.14",
         vars = mapOf("ENV" to "value")
     )
-    functionId = res.id
-    println(res.toMap())
+    functionId = function.id
+    println(function.toJson())
 }
 
 suspend fun listFunctions() {
     println("Running List Functions API")
-
-    val res = functions.list()
-    println(res.functions.first().toMap())
+    val functions = functions.list()
+    println(functions.toJson())
 }
 
 suspend fun deleteFunction() {
     println("Running Delete Function API")
-
     functions.delete(functionId)
-    println("Function deleted")
+    println("Function Deleted")
 }
 
 suspend fun uploadFile() {
     println("Running Upload File API")
 
     val file = File("./nature.jpg")
-    val response = storage.createFile(
+    val storageFile = storage.createFile(
         bucketId = bucketId,
         fileId = "unique()",
-        file = file, // Multipart file
+        file = file,
         read = listOf("role:all")
     )
-    fileId = response.id
-    println(response.toMap())
+    fileId = storageFile.id
+    println(storageFile.toJson())
 }
 
 suspend fun createBucket() {
     println("Running Create Bucket API")
+    val bucket = storage.createBucket(
+        bucketId = "unique()",
+        name = "Name",
+        permission = "bucket"
+    )
+    bucketId = bucket.id
+    println(bucket.toJson())
+}
 
-    val res = storage.createBucket("unique()", "Name", "bucket")
-    bucketId = res.id
-    println(res.toMap())
+suspend fun listBuckets() {
+    println("Running List Buckets API")
+    val buckets = storage.listBuckets()
+    println(buckets.toJson())
 }
 
 suspend fun listFiles() {
     println("Running List File API")
-
-    val res = storage.listFiles(bucketId)
-    println(res.files.first().toMap())
+    val files = storage.listFiles(bucketId)
+    println(files.toJson())
 }
 
 suspend fun deleteFile() {
     println("Running Delete File API")
-
     storage.deleteFile(bucketId, fileId)
-    println("File deleted")
+    println("File Deleted")
 }
