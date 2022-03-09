@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  playground-for-kotlin:
+    build: .
+    volumes:
+      - "./:/app"
+    working_dir: /app
+    command: "sh gradlew run"
