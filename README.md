@@ -24,7 +24,7 @@ This playground doesn't include any Kotlin best practices, but rather intended t
 4. Copy your Project ID, endpoint and API key from Appwrite console into `Main.kt`
 5. Run the playground:
    Kotlin:
-   - Execute the command `./gradlew run`
+   - Execute the command `sh gradlew run`
    Docker:
    - Execute the command `docker compose up`
 6. You will see the JSON response in the console.
