@@ -1,6 +1,9 @@
 package io.appwrite.playgroundforkotlin
 
 import io.appwrite.Client
+import io.appwrite.ID
+import io.appwrite.Permission
+import io.appwrite.Role
 import io.appwrite.exceptions.AppwriteException
 import io.appwrite.extensions.toJson
 import io.appwrite.models.InputFile
@@ -10,12 +13,11 @@ import java.io.File
 import kotlin.system.exitProcess
 
 val client = Client()
-    .setEndpoint("http://192.168.4.23/v1")
-    .setProject("test")
-    .setKey("2d1670e9a828bd47d9b27356d56fadf7ceea4c815abbabe644eb3195b88f3b3b495a5f530785b70ef705d9f164f751cc2cf10546ed31b71c62eb151fd2bb96053917731dad2a84f439cb0628dcde59f1311c3ba2be0433d0b73ecb700cadaa07b215d810ecc9fb3c092e178b0dd4fa7bda5819ebbd1ab4917f949e3e936518e1")
-    .setSelfSigned(true)
+    .setEndpoint("YOUR_ENDPOINT")
+    .setProject("YOUR_PROJECT_ID")
+    .setKey("YOUR_API_KEY")
 
-val databases = Databases(client, "moviesDB")
+val databases = Databases(client)
 val storage = Storage(client)
 val functions = Functions(client)
 val users = Users(client)
@@ -60,8 +62,9 @@ suspend fun main() {
 suspend fun createUser(email: String, password: String, name: String) {
     println("Running create user API")
     val user = users.create(
-        userId = "unique()",
+        userId = ID.unique(),
         email,
+        null,
         password,
         name
     )
@@ -83,14 +86,14 @@ suspend fun deleteUser() {
 
 suspend fun createDatabase() {
     println("Running create database API")
-    val database = databases.create(name = "Movies")
+    val database = databases.create(ID.unique(), "Movies")
     databaseId = database.id
     println(database.toJson())
 }
 
 suspend fun deleteDatabase() {
     println("Running delete database API")
-    databases.delete()
+    databases.delete(databaseId)
     println("Database deleted")
 }
 
@@ -98,18 +101,24 @@ suspend fun createCollection() {
     println("Running create collection API")
 
     val collection = databases.createCollection(
+        databaseId,
         collectionId = "movies",
         name = "Movies",
-        permission = "document",
-        read = arrayListOf("role:all"),
-        write = arrayListOf("role:all")
+        permissions = listOf(
+            Permission.create(Role.users()),
+            Permission.read(Role.users()),
+            Permission.update(Role.users()),
+            Permission.delete(Role.users()),
+        ),
+        documentSecurity = true,
     )
     collectionId = collection.id
     println(collection.toJson())
 
     println("Running create string attribute")
     val str = databases.createStringAttribute(
-        collectionId = collectionId,
+        databaseId,
+        collectionId,
         key = "name",
         size = 255,
         required = true,
@@ -120,7 +129,8 @@ suspend fun createCollection() {
 
     println("Running create integer attribute")
     val int = databases.createIntegerAttribute(
-        collectionId = collectionId,
+        databaseId,
+        collectionId,
         key = "release_year",
         required = true,
         min = 0,
@@ -130,7 +140,8 @@ suspend fun createCollection() {
 
     println("Running create float attribute")
     val float = databases.createFloatAttribute(
-        collectionId = collectionId,
+        databaseId,
+        collectionId,
         key = "rating",
         required = true,
         min = 0.0,
@@ -140,7 +151,8 @@ suspend fun createCollection() {
 
     println("Running create boolean attribute")
     val bool = databases.createBooleanAttribute(
-        collectionId = collectionId,
+        databaseId,
+        collectionId,
         key = "kids",
         required = true
     )
@@ -148,7 +160,8 @@ suspend fun createCollection() {
 
     println("Running create email attribute")
     val email = databases.createEmailAttribute(
-        collectionId = collectionId,
+        databaseId,
+        collectionId,
         key = "email",
         required = false,
         default = ""
@@ -159,7 +172,8 @@ suspend fun createCollection() {
 
     println("Running create index")
     val index = databases.createIndex(
-        collectionId = collectionId,
+        databaseId,
+        collectionId,
         key = "name_email_idx",
         type = "fulltext",
         attributes = listOf("name", "email")
@@ -169,13 +183,13 @@ suspend fun createCollection() {
 
 suspend fun listCollections() {
     println("Running list collection API")
-    val collections = databases.listCollections()
+    val collections = databases.listCollections(databaseId)
     println(collections.toJson())
 }
 
 suspend fun deleteCollection() {
     println("Running delete collection API")
-    databases.deleteCollection(collectionId)
+    databases.deleteCollection(databaseId, collectionId)
     println("Collection Deleted")
 }
 
@@ -183,16 +197,20 @@ suspend fun createDocument() {
     println("Running Add Document API")
 
     val document = databases.createDocument(
-        collectionId = collectionId,
-        documentId = "unique()",
+        databaseId,
+        collectionId,
+        documentId = ID.unique(),
         data = mapOf(
             "name" to "Spider Man",
             "release_year" to 1920,
             "rating" to 98.5,
             "kids" to false
         ),
-        read = listOf("role:all"),
-        write = listOf("role:all")
+        permissions = listOf(
+            Permission.read(Role.users()),
+            Permission.update(Role.users()),
+            Permission.delete(Role.users()),
+        )
     )
     documentId = document.id
     println(document.toJson())
@@ -200,27 +218,42 @@ suspend fun createDocument() {
 
 suspend fun listDocuments() {
     println("Running List Document API")
-    val documents = databases.listDocuments(collectionId)
+    val documents = databases.listDocuments(
+        databaseId,
+        collectionId
+    )
     println(documents.toJson())
 }
 
 suspend fun deleteDocument() {
     println("Running Delete Document API")
-    databases.deleteDocument(collectionId, documentId)
+    databases.deleteDocument(
+        databaseId,
+        collectionId,
+        documentId
+    )
     println("Document Deleted")
 }
 
 suspend fun createFunction() {
     println("Running Create Function API")
     val function = functions.create(
-        functionId = "unique()",
+        functionId = ID.unique(),
         name = "Test Function",
-        execute = listOf("role:all"),
-        runtime = "dart-2.14",
-        vars = mapOf("ENV" to "value")
+        execute = listOf(Role.any()),
+        runtime = "php-8.0",
     )
+
     functionId = function.id
+
+    val variable = functions.createVariable(
+        functionId,
+        key = "ENV",
+        value = "value"
+    )
+
     println(function.toJson())
+    println(variable.toJson())
 }
 
 suspend fun listFunctions() {
@@ -241,9 +274,11 @@ suspend fun uploadFile() {
     val file = InputFile.fromPath("./nature.jpg")
     val storageFile = storage.createFile(
         bucketId = bucketId,
-        fileId = "unique()",
+        fileId = ID.unique(),
         file = file,
-        read = listOf("role:all")
+        permissions = listOf(
+            Permission.update(Role.any())
+        )
     )
     fileId = storageFile.id
     println(storageFile.toJson())
@@ -252,9 +287,15 @@ suspend fun uploadFile() {
 suspend fun createBucket() {
     println("Running Create Bucket API")
     val bucket = storage.createBucket(
-        bucketId = "unique()",
+        bucketId = ID.unique(),
         name = "Name",
-        permission = "bucket"
+        permissions = listOf(
+            Permission.read(Role.any()),
+            Permission.create(Role.users()),
+            Permission.update(Role.users()),
+            Permission.delete(Role.users()),
+        ),
+        fileSecurity = true
     )
     bucketId = bucket.id
     println(bucket.toJson())
