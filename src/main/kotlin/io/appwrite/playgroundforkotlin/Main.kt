@@ -4,18 +4,21 @@ import io.appwrite.Client
 import io.appwrite.ID
 import io.appwrite.Permission
 import io.appwrite.Role
-import io.appwrite.exceptions.AppwriteException
+import io.appwrite.enums.IndexType
+import io.appwrite.enums.Runtime
 import io.appwrite.extensions.toJson
 import io.appwrite.models.InputFile
-import io.appwrite.services.*
+import io.appwrite.services.Databases
+import io.appwrite.services.Functions
+import io.appwrite.services.Storage
+import io.appwrite.services.Users
 import kotlinx.coroutines.delay
-import java.io.File
 import kotlin.system.exitProcess
 
 val client = Client()
-    .setEndpoint("YOUR_ENDPOINT")
-    .setProject("YOUR_PROJECT_ID")
-    .setKey("YOUR_API_KEY")
+    .setEndpoint("YOUR_ENDPOINT")   // Replace with your endpoint
+    .setProject("YOUR_PROJECT_ID")  // Replace with your project ID
+    .setKey("YOUR_API_KEY")         // Replace with your API Key
 
 val databases = Databases(client)
 val storage = Storage(client)
@@ -122,7 +125,6 @@ suspend fun createCollection() {
         key = "name",
         size = 255,
         required = true,
-        default = "",
         array = false
     )
     println(str.toJson())
@@ -164,7 +166,6 @@ suspend fun createCollection() {
         collectionId,
         key = "email",
         required = false,
-        default = ""
     )
     println(email.toJson())
 
@@ -175,7 +176,7 @@ suspend fun createCollection() {
         databaseId,
         collectionId,
         key = "name_email_idx",
-        type = "fulltext",
+        type = IndexType.FULLTEXT,
         attributes = listOf("name", "email")
     )
     println(index.toJson())
@@ -241,7 +242,7 @@ suspend fun createFunction() {
         functionId = ID.unique(),
         name = "Test Function",
         execute = listOf(Role.any()),
-        runtime = "php-8.0",
+        runtime = Runtime.PHP_8_0,
     )
 
     functionId = function.id
