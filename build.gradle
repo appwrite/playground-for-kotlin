@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.9.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.25'
     id 'application'
 }
 
@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     implementation("io.appwrite:sdk-for-kotlin:5.0.2")
-    implementation("com.google.code.gson:gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.15.0")
 }
 
 application {
